@@ -32,7 +32,7 @@
     "enabled": true,
     "sourceImage": "assets/banner-base.png",
     "uploadCooldownMinutes": 9,
-    "maxUploadsPerHour": 6,
+    "maxUploadsPerHour": 8,
     "badges": [
       {
         "counter": "voice",
