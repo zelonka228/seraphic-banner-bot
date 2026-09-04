@@ -44,14 +44,25 @@ jobs:
           echo "::warning::а такие коммиты не считаются активностью репозитория."
           echo "::warning::Расписание всё равно может быть отключено через 60 дней."
 
+      # Требует у токена права Actions: Read and write. Если его нет — не беда,
+      # главную работу (коммит активности) прогон уже сделал.
       - name: Вернуть расписание, если его отключили
         if: env.HAS_PAT == 'true'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.KEEPALIVE_TOKEN }}
         run: |
           state=$(gh workflow list --all --repo "$GITHUB_REPOSITORY" | grep "banner.yml" | awk '{print $2}')
           echo "Состояние расписания баннера: $state"
-          if [ "$state" != "active" ]; then
-            gh workflow enable banner.yml --repo "$GITHUB_REPOSITORY"
-            echo "Расписание включено обратно"
+
+          if [ "$state" = "active" ]; then
+            echo "Расписание работает, вмешательство не нужно"
+            exit 0
+          fi
+
+          if gh workflow enable banner.yml --repo "$GITHUB_REPOSITORY" 2>/dev/null; then
+            echo "Расписание было отключено и включено обратно"
+          else
+            echo "::warning::Расписание отключено, но токену не хватает права Actions: Read and write."
+            echo "::warning::Включи расписание вручную или добавь это право токену KEEPALIVE_TOKEN."
           fi
