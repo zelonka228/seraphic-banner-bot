@@ -48,7 +48,7 @@
     }
   ],
   "style": {
-    "x": 0,
+    "x": 25,
     "y": 317,
     "gap": 5,
     "direction": "column",
