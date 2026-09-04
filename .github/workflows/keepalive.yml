@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
+    # Контекст secrets нельзя использовать в условиях шагов — выносим сюда
+    env:
+      HAS_PAT: ${{ secrets.KEEPALIVE_TOKEN != '' }}
+
     steps:
       # KEEPALIVE_TOKEN — личный токен (PAT). Коммиты от встроенного GITHUB_TOKEN
       # GitHub не засчитывает как активность репозитория, от личного — засчитывает.
@@ -34,14 +38,14 @@ jobs:
           git push
 
       - name: Предупредить, если токена нет
-        if: ${{ !secrets.KEEPALIVE_TOKEN }}
+        if: env.HAS_PAT != 'true'
         run: |
           echo "::warning::Секрет KEEPALIVE_TOKEN не задан. Коммит сделан от имени GitHub Actions,"
           echo "::warning::а такие коммиты не считаются активностью репозитория."
           echo "::warning::Расписание всё равно может быть отключено через 60 дней."
 
       - name: Вернуть расписание, если его отключили
-        if: ${{ secrets.KEEPALIVE_TOKEN }}
+        if: env.HAS_PAT == 'true'
         env:
           GH_TOKEN: ${{ secrets.KEEPALIVE_TOKEN }}
         run: |
