@@ -3,6 +3,7 @@
 // Одно обновление баннера со всеми проверками лимитов.
 // Используется и постоянным режимом (banner.js), и разовым запуском по расписанию (once.js).
 
+const crypto = require('node:crypto');
 const { renderBanner } = require('./render-banner');
 const { load, save } = require('./cooldown');
 const { collectStats, usesPresence } = require('./stats');
@@ -42,7 +43,16 @@ async function updateBanner(client, guildId, config, options = {}) {
     return { status: 'no-banner', stats, detail: `уровень бустов ${guild.premiumTier}` };
   }
 
-  const signature = config.banner.badges.map((badge) => stats[badge.counter]).join('|');
+  // В отпечаток входят не только цифры, но и оформление: иначе правка стиля
+  // в config.json осталась бы незамеченной — цифры прежние, значит «заливать нечего».
+  const look = crypto
+    .createHash('sha1')
+    .update(JSON.stringify({ badges: config.banner.badges, style: config.banner.style }))
+    .digest('hex')
+    .slice(0, 8);
+
+  const counts = config.banner.badges.map((badge) => stats[badge.counter]).join('|');
+  const signature = `${look}:${counts}`;
 
   if (signature === box.signature) {
     return { status: 'unchanged', stats, signature };
