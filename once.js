@@ -10,7 +10,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, GatewayIntentBits, Events } = require('discord.js');
 const { updateBanner, recordRateLimit, recordRetryAfter, limits } = require('./banner-core');
-const { notify } = require('./notify');
+const { notify, updateStatus, ping } = require('./notify');
+const { load, save } = require('./cooldown');
 
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
 
@@ -26,8 +27,52 @@ function stamp() {
 
 async function fail(title, text) {
   console.error(`${stamp()}  ${title}: ${text}`);
+  await ping(false);
   await notify(title, text, 'error');
   process.exit(1);
+}
+
+// Время показываем московское: логи раннера в UTC, а смотреть на карточку человеку
+function moscow(value) {
+  if (!value) return 'ещё не было';
+  return new Date(value).toLocaleString('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+// Карточка состояния переписывается после каждой проверки — по ней видно,
+// что бот жив, даже когда заливать нечего.
+async function refreshStatus(result, maxPerHour) {
+  try {
+    const store = load();
+    if (!store.banner) store.banner = {};
+
+    const hourAgo = Date.now() - 60 * 60 * 1000;
+    const used = (store.banner.uploads || []).filter((time) => time > hourAgo).length;
+
+    const id = await updateStatus(
+      {
+        ok: true,
+        checkedAt: moscow(Date.now()),
+        uploadedAt: moscow(store.banner.lastUpload),
+        voice: result.stats?.voice ?? '—',
+        members: result.stats?.members ?? '—',
+        budget: `${maxPerHour - used} из ${maxPerHour}`,
+      },
+      store.banner,
+    );
+
+    if (id && id !== store.banner.statusMessageId) {
+      store.banner.statusMessageId = id;
+      save(store);
+    }
+  } catch (err) {
+    console.warn(`${stamp()}  карточка состояния не обновилась: ${err.message}`);
+  }
 }
 
 if (!TOKEN || !GUILD_ID) {
@@ -102,6 +147,11 @@ client.once(Events.ClientReady, async (readyClient) => {
 
       default:
         console.log(`${stamp()}  статус: ${result.status}`);
+    }
+
+    if (result.status !== 'no-banner') {
+      await refreshStatus(result, maxPerHour);
+      await ping(true);
     }
 
     clearTimeout(guard);

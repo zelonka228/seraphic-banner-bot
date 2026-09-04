@@ -75,4 +75,65 @@ async function notify(title, text, level = 'error') {
   return sent;
 }
 
-module.exports = { notify };
+
+// Живая карточка состояния в Discord: одно сообщение, которое бот переписывает
+// после каждой проверки. Если время на нём застыло — значит бот молчит.
+async function updateStatus(fields, state) {
+  const url = process.env.ALERT_DISCORD_WEBHOOK;
+  if (!url) return null;
+
+  const embed = {
+    title: fields.ok ? 'Баннер обновляется' : 'Баннер не обновляется',
+    color: fields.ok ? 0x63c96f : COLORS.error,
+    fields: [
+      { name: 'Последняя проверка', value: fields.checkedAt, inline: true },
+      { name: 'Последняя заливка', value: fields.uploadedAt, inline: true },
+      { name: '​', value: '​', inline: true },
+      { name: 'В войсе', value: String(fields.voice), inline: true },
+      { name: 'Участников', value: String(fields.members), inline: true },
+      { name: 'Заливок в этом часу', value: fields.budget, inline: true },
+    ],
+    footer: { text: fields.note || 'Проверка каждые 10 минут' },
+    timestamp: new Date().toISOString(),
+  };
+
+  const id = state?.statusMessageId;
+
+  // Пробуем переписать старое сообщение, чтобы канал не засорялся
+  if (id) {
+    const res = await fetch(`${url}/messages/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed] }),
+    });
+    if (res.ok) return id;
+    // Сообщение удалили — заведём новое
+  }
+
+  const res = await fetch(`${url}?wait=true`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ embeds: [embed] }),
+  });
+
+  if (!res.ok) throw new Error(`Discord ответил ${res.status}`);
+  const created = await res.json();
+  return created.id;
+}
+
+// Пинг сторожевого сервиса: он сам поднимет тревогу, если пинг не пришёл вовремя.
+// Единственное, что ловит полное молчание бота.
+async function ping(ok = true) {
+  const url = process.env.HEALTHCHECK_URL;
+  if (!url) return false;
+
+  try {
+    await fetch(ok ? url : `${url}/fail`, { method: 'POST' });
+    return true;
+  } catch (err) {
+    console.warn(`Сторожевой пинг не ушёл: ${err.message}`);
+    return false;
+  }
+}
+
+module.exports = { notify, updateStatus, ping };
