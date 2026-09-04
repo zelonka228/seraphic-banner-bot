@@ -1,0 +1,53 @@
+name: Продление расписания
+
+# GitHub отключает расписания в репозиториях, где 60 дней нет активности.
+# Этот прогон раз в месяц делает коммит и, если нужно, включает расписание обратно.
+
+on:
+  schedule:
+    - cron: '0 7 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # KEEPALIVE_TOKEN — личный токен (PAT). Коммиты от встроенного GITHUB_TOKEN
+      # GitHub не засчитывает как активность репозитория, от личного — засчитывает.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.KEEPALIVE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Отметить активность
+        run: |
+          date -u +"Последняя отметка: %Y-%m-%d %H:%M UTC" > .keepalive
+          git config user.name "zelonka228"
+          git config user.email "66870752+zelonka228@users.noreply.github.com"
+          git add .keepalive
+          git diff --staged --quiet || git commit -m "Продление расписания"
+          git push
+
+      - name: Предупредить, если токена нет
+        if: ${{ !secrets.KEEPALIVE_TOKEN }}
+        run: |
+          echo "::warning::Секрет KEEPALIVE_TOKEN не задан. Коммит сделан от имени GitHub Actions,"
+          echo "::warning::а такие коммиты не считаются активностью репозитория."
+          echo "::warning::Расписание всё равно может быть отключено через 60 дней."
+
+      - name: Вернуть расписание, если его отключили
+        if: ${{ secrets.KEEPALIVE_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.KEEPALIVE_TOKEN }}
+        run: |
+          state=$(gh workflow list --all --repo "$GITHUB_REPOSITORY" | grep "banner.yml" | awk '{print $2}')
+          echo "Состояние расписания баннера: $state"
+          if [ "$state" != "active" ]; then
+            gh workflow enable banner.yml --repo "$GITHUB_REPOSITORY"
+            echo "Расписание включено обратно"
+          fi
