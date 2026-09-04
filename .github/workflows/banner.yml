@@ -20,7 +20,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci --omit=dev
+      - run: npm ci --omit=dev --no-audit --no-fund
 
       # Память о заливках: без неё бот перезальёт баннер даже когда цифры прежние
       - name: Достать состояние
