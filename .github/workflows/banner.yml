@@ -1,0 +1,69 @@
+name: Баннер
+
+on:
+  schedule:
+    # Каждые 10 минут. Совпадает с кулдауном бота, поэтому расписание само
+    # по себе не даёт превысить лимит Discord.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: Холостой прогон, без заливки на сервер
+        type: boolean
+        default: false
+
+# Два запуска одновременно не нужны — иначе оба увидят одинаковые цифры
+concurrency:
+  group: banner
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --omit=dev
+
+      # Память о заливках: без неё бот перезальёт баннер даже когда цифры прежние
+      - name: Достать состояние
+        uses: actions/cache/restore@v4
+        with:
+          path: .state.json
+          key: banner-state-${{ github.run_id }}
+          restore-keys: banner-state-
+
+      - name: Обновить баннер
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+          ALERT_DISCORD_WEBHOOK: ${{ secrets.ALERT_DISCORD_WEBHOOK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRY_RUN: ${{ inputs.dry && '1' || '0' }}
+        run: node once.js
+
+      - name: Сохранить состояние
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .state.json
+          key: banner-state-${{ github.run_id }}
+
+      # Срабатывает на любом падении: упавший бот, сломанная сборка, отозванный токен
+      - name: Сообщить о сбое
+        if: failure()
+        env:
+          ALERT_DISCORD_WEBHOOK: ${{ secrets.ALERT_DISCORD_WEBHOOK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          node alert.js "Баннер-бот упал" "Запуск ${{ github.run_number }} завершился с ошибкой.
+          Логи: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
