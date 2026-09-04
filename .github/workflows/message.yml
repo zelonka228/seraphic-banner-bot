@@ -17,6 +17,16 @@ on:
         type: string
         required: true
         default: Проверяю, доходят ли оповещения.
+      level:
+        description: 'Цвет полосы слева'
+        type: choice
+        required: true
+        default: success
+        options:
+          - success
+          - info
+          - warn
+          - error
 
 jobs:
   send:
@@ -34,4 +44,5 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TITLE: ${{ inputs.title }}
           TEXT: ${{ inputs.text }}
-        run: node alert.js "$TITLE" "$TEXT"
+          LEVEL: ${{ inputs.level }}
+        run: node alert.js "$TITLE" "$TEXT" "$LEVEL"

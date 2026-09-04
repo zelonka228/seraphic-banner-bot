@@ -17,7 +17,11 @@ const { notify } = require('./notify');
 const title = process.argv[2] || 'Сбой баннер-бота';
 const text = process.argv[3] || 'Запуск завершился с ошибкой. Подробности в логах.';
 
-notify(title, text, 'error')
+// Цвет полосы слева: success — зелёный, info — синий, warn — жёлтый, error — красный.
+// По умолчанию красный: без указания цвета этим файлом сообщают о сбоях.
+const level = process.argv[4] || 'error';
+
+notify(title, text, level)
   .then((sent) => {
     console.log(sent.length ? `Оповещение отправлено: ${sent.join(', ')}` : 'Каналы оповещения не настроены');
     process.exit(0);

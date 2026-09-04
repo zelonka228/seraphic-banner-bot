@@ -7,7 +7,12 @@
 //   TELEGRAM_BOT_TOKEN     — токен бота от @BotFather
 //   TELEGRAM_CHAT_ID       — твой chat_id
 
-const COLORS = { error: 0xe24b4a, warn: 0xef9f27, info: 0x63c1f0 };
+const COLORS = {
+  error: 0xe24b4a,   // красный
+  warn: 0xef9f27,    // жёлтый
+  info: 0x63c1f0,    // синий
+  success: 0x63c96f, // зелёный
+};
 
 async function toDiscord(title, text, level) {
   const url = process.env.ALERT_DISCORD_WEBHOOK;
@@ -38,7 +43,8 @@ async function toTelegram(title, text, level) {
   const chat = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chat) return null;
 
-  const mark = level === 'error' ? '🔴' : level === 'warn' ? '🟡' : '🔵';
+  const marks = { error: '🔴', warn: '🟡', success: '🟢', info: '🔵' };
+  const mark = marks[level] || marks.info;
   const body = `${mark} <b>${escapeHtml(title)}</b>\n\n${escapeHtml(text)}`.slice(0, 4000);
 
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
