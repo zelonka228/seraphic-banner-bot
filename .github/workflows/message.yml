@@ -28,13 +28,16 @@ on:
           - warn
           - error
 
+permissions:
+  contents: read
+
 jobs:
   send:
     runs-on: ubuntu-latest
     timeout-minutes: 3
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
 
       # Пакеты не нужны: отправка работает на встроенном в Node fetch
       - name: Отправить
