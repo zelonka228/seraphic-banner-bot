@@ -48,11 +48,11 @@
     }
   ],
   "style": {
-    "x": 37,
+    "x": 0,
     "y": 317,
     "gap": 5,
     "direction": "column",
-    "fontSize": 35,
+    "fontSize": 40,
     "radius": 10,
     "background": "#f06fc0",
     "opacity": 0.93,
