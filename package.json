@@ -1,0 +1,21 @@
+{
+  "name": "discord-stats-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Счётчики Discord: строки в списке каналов и плашки прямо на баннере сервера",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "check": "node check.js",
+    "test": "node test.js",
+    "start": "node index.js",
+    "banner": "node banner.js",
+    "preview": "node preview.js",
+    "site": "start preview.html"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.8",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}

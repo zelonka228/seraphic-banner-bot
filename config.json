@@ -1,0 +1,68 @@
+{
+  "categoryName": "📊 СТАТИСТИКА",
+  "pollSeconds": 30,
+  "renameCooldownMinutes": 6,
+  "voice": {
+    "excludeBots": true,
+    "excludeAfk": true
+  },
+  "counters": {
+    "members": {
+      "enabled": true,
+      "channelId": "",
+      "template": "👥 Участников: {count}"
+    },
+    "online": {
+      "enabled": true,
+      "channelId": "",
+      "template": "🟢 Онлайн: {count}"
+    },
+    "voice": {
+      "enabled": true,
+      "channelId": "",
+      "template": "🔊 В войсе: {count}"
+    },
+    "boosts": {
+      "enabled": true,
+      "channelId": "",
+      "template": "💎 Бустов: {count}"
+    }
+  },
+  "banner": {
+    "enabled": true,
+    "sourceImage": "assets/banner-base.png",
+    "uploadCooldownMinutes": 10,
+    "maxUploadsPerHour": 6,
+    "badges": [
+      {
+        "counter": "voice",
+        "icon": "mic",
+        "prefix": "",
+        "locale": "none"
+      },
+      {
+        "counter": "members",
+        "icon": "users",
+        "prefix": "",
+        "locale": "none"
+      }
+    ],
+    "style": {
+      "x": 40,
+      "y": 450,
+      "gap": 20,
+      "direction": "row",
+      "fontSize": 44,
+      "radius": 19,
+      "background": "#fb6fc8",
+      "opacity": 1,
+      "text": "#ffffff",
+      "border": "#ffffff",
+      "borderWidth": 2,
+      "shadow": 1,
+      "shadowColor": "rgba(150, 20, 90, 0.38)",
+      "scrim": 0,
+      "scrimColor": "#ffffff"
+    }
+  }
+}

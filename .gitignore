@@ -1,0 +1,8 @@
+node_modules/
+.env
+.state.json
+preview.png
+preview-live.png
+preview-row.png
+preview-font.png
+banner-to-upload.png
