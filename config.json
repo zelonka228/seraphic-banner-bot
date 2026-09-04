@@ -33,36 +33,36 @@
     "sourceImage": "assets/banner-base.png",
     "uploadCooldownMinutes": 10,
     "maxUploadsPerHour": 6,
-    "badges": [
-      {
-        "counter": "voice",
-        "icon": "mic",
-        "prefix": "",
-        "locale": "none"
-      },
-      {
-        "counter": "members",
-        "icon": "users",
-        "prefix": "",
-        "locale": "none"
-      }
-    ],
-    "style": {
-      "x": 40,
-      "y": 352,
-      "gap": 12,
-      "direction": "column",
-      "fontSize": 40,
-      "radius": 19,
-      "background": "#fb6fc8",
-      "opacity": 1,
-      "text": "#ffffff",
-      "border": "#ffffff",
-      "borderWidth": 2,
-      "shadow": 1,
-      "shadowColor": "rgba(150, 20, 90, 0.38)",
-      "scrim": 0,
-      "scrimColor": "#ffffff"
+  "badges": [
+    {
+      "counter": "voice",
+      "icon": "mic",
+      "prefix": "",
+      "locale": "none"
+    },
+    {
+      "counter": "members",
+      "icon": "users",
+      "prefix": "",
+      "locale": "none"
+    }
+  ],
+  "style": {
+    "x": 37,
+    "y": 317,
+    "gap": 5,
+    "direction": "column",
+    "fontSize": 35,
+    "radius": 10,
+    "background": "#f06fc0",
+    "opacity": 0.93,
+    "text": "#ffffff",
+    "border": "#ffffff",
+    "borderWidth": 3,
+    "shadow": 1,
+    "shadowColor": "rgba(150, 20, 90, 0.38)",
+    "scrim": 0,
+    "scrimColor": "#ffffff"
     }
   }
 }
