@@ -1,0 +1,37 @@
+name: Отправить сообщение
+
+# Кнопка для ручной отправки сообщения через вебхук.
+# Нужна, чтобы проверить связь или написать себе заметку, не открывая консоль.
+# Работает и с телефона через приложение GitHub.
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: Заголовок
+        type: string
+        required: true
+        default: Проверка связи
+      text:
+        description: Текст сообщения
+        type: string
+        required: true
+        default: Проверяю, доходят ли оповещения.
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # Пакеты не нужны: отправка работает на встроенном в Node fetch
+      - name: Отправить
+        env:
+          ALERT_DISCORD_WEBHOOK: ${{ secrets.ALERT_DISCORD_WEBHOOK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TITLE: ${{ inputs.title }}
+          TEXT: ${{ inputs.text }}
+        run: node alert.js "$TITLE" "$TEXT"
