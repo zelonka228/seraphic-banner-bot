@@ -52,7 +52,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.KEEPALIVE_TOKEN }}
         run: |
-          state=$(gh workflow list --all --repo "$GITHUB_REPOSITORY" | grep "banner.yml" | awk '{print $2}')
+          state=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/banner.yml" --jq .state)
           echo "Состояние расписания баннера: $state"
 
           if [ "$state" = "active" ]; then
