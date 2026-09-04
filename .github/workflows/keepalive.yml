@@ -24,7 +24,7 @@ jobs:
     steps:
       # KEEPALIVE_TOKEN — личный токен (PAT). Коммиты от встроенного GITHUB_TOKEN
       # GitHub не засчитывает как активность репозитория, от личного — засчитывает.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           token: ${{ secrets.KEEPALIVE_TOKEN || secrets.GITHUB_TOKEN }}
 
