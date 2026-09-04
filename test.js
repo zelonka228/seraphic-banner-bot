@@ -201,9 +201,13 @@ async function run() {
   check('исчерпанный бюджет блокирует',
     budget(Array.from({ length: cap }, (_, i) => now - i * 60000)) <= 0);
 
-  const perHourByCooldown = 60 / config.banner.uploadCooldownMinutes;
-  check('кулдаун не даст превысить часовой потолок', perHourByCooldown <= cap,
-    `кулдаун допускает ${perHourByCooldown}/час при потолке ${cap}`);
+  check('часовой потолок не выше 6', cap <= 6, `сейчас ${cap}`);
+
+  // Кулдаун должен быть строго меньше интервала будильника, иначе из-за разброса
+  // времени старта каждый второй запуск будет отказывать и цифры отстанут вдвое
+  const trigger = 10;
+  check('кулдаун меньше интервала будильника', config.banner.uploadCooldownMinutes < trigger,
+    `кулдаун ${config.banner.uploadCooldownMinutes} мин при будильнике раз в ${trigger} мин`);
 
   console.log('');
   console.log(`  Пройдено: ${passed}, провалено: ${failed}`);
